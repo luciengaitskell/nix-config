@@ -3,6 +3,7 @@ _:
 [
   # Development Tools
   "homebrew/cask/docker"
+  "tower"
 
   # Communication Tools
   "discord"
