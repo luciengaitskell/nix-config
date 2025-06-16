@@ -15,6 +15,7 @@ with pkgs; [
   sqlite
   wget
   zip
+  gh
 
   # Encryption and security tools
   age
