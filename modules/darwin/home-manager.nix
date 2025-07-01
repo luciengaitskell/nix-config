@@ -42,6 +42,7 @@ in
       "wireguard" = 1451685025;
       "craft" = 1487937127;
       "microsoft-outlook" = 985367838;
+      "xcode" = 497799835;
     };
   };
 
