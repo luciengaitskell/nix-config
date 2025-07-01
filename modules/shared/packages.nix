@@ -42,6 +42,7 @@ with pkgs; [
   nodePackages.npm # globally install npm
   nodePackages.prettier
   nodejs
+  yarn
 
   # Text and terminal utilities
   htop
