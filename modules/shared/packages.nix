@@ -58,8 +58,7 @@ with pkgs; [
   zsh-powerlevel10k
 
   # Python packages
-  python3
-  virtualenv
+  uv
 
   # Dev tools
   vscode
