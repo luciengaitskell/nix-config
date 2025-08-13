@@ -62,4 +62,7 @@ with pkgs; [
 
   # Dev tools
   vscode
+
+  # Compilers
+  gfortran14
 ]
