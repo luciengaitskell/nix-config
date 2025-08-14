@@ -65,4 +65,7 @@ with pkgs; [
 
   # Compilers
   gfortran14
+
+  # Embedded dev
+  platformio
 ]
