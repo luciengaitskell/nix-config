@@ -6,4 +6,5 @@ shared-packages ++ [
   dockutil
   aerospace
   swiftlint
+  utm
 ]
