@@ -6,6 +6,7 @@ _:
   "tower"
   "balenaetcher"
   "raspberry-pi-imager"
+  "secretive"
 
   # Communication Tools
   "discord"
