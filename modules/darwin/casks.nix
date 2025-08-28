@@ -4,6 +4,7 @@ _:
   # Development Tools
   "homebrew/cask/docker"
   "tower"
+  "balenaetcher"
 
   # Communication Tools
   "discord"
