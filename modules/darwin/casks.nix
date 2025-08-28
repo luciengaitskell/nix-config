@@ -5,6 +5,7 @@ _:
   "homebrew/cask/docker"
   "tower"
   "balenaetcher"
+  "raspberry-pi-imager"
 
   # Communication Tools
   "discord"
