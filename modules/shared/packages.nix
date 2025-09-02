@@ -72,4 +72,5 @@ with pkgs; [
   # Hardware dev
   iverilog
   surfer
+  openfpgaloader
 ]
