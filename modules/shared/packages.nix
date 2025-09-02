@@ -68,4 +68,7 @@ with pkgs; [
 
   # Embedded dev
   platformio
+
+  # Hardware dev
+  iverilog
 ]
