@@ -70,6 +70,7 @@ with pkgs; [
   platformio
 
   # Hardware dev
+  verible
   iverilog
   surfer
   openfpgaloader
