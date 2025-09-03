@@ -60,6 +60,12 @@ in
         activate
       end tell'
       ${"'''"}
+      alt-n = ${"'''"}exec-and-forget osascript -e '
+      tell application "Safari" 
+        make new document
+        activate
+      end tell'
+      ${"'''"}
 
       # i3 wraps focus by default
       alt-j =         'focus --boundaries-action wrap-around-the-workspace left'
