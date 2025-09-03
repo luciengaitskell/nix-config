@@ -16,6 +16,7 @@ with pkgs; [
   wget
   zip
   gh
+  nixfmt-rfc-style
 
   # Encryption and security tools
   age
