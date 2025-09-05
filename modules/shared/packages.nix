@@ -77,4 +77,7 @@ with pkgs;
   surfer
   openfpgaloader
   pulseview
+
+  # LaTeX
+  texlive.combined.scheme-full
 ]
