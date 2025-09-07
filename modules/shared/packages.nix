@@ -18,6 +18,7 @@ with pkgs;
   zip
   gh
   nixfmt-rfc-style
+  qemu
 
   # Encryption and security tools
   age
