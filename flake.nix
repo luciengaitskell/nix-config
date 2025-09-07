@@ -23,13 +23,17 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
+    homebrew-riscv = {
+      url = "github:riscv/homebrew-riscv";
+      flake = false;
+    };
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, home-manager, nixpkgs, disko } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-riscv, home-manager, nixpkgs, disko } @inputs:
     let
       user = "lucg";
       linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
@@ -91,6 +95,7 @@
                   "homebrew/homebrew-core" = homebrew-core;
                   "homebrew/homebrew-cask" = homebrew-cask;
                   "homebrew/homebrew-bundle" = homebrew-bundle;
+                  "riscv/homebrew-riscv" = homebrew-riscv;
                 };
                 mutableTaps = false;
                 autoMigrate = true;

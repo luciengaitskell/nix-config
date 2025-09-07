@@ -26,6 +26,7 @@ in
   homebrew = {
     enable = true;
     casks = pkgs.callPackage ./casks.nix {};
+    brews = pkgs.callPackage ./brews.nix {};
     onActivation.cleanup = "zap";
 
     # These app IDs are from using the mas CLI app

@@ -124,6 +124,22 @@
         "type": "github"
       }
     },
+    "homebrew-riscv": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1755360424,
+        "narHash": "sha256-9SlVjqZ5xB28reEy/seRN3BxuBo6Wd4eNFTM4Xh2XRM=",
+        "owner": "riscv",
+        "repo": "homebrew-riscv",
+        "rev": "2434aac00803d570c1b04190c76f647e7d1661e7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "riscv",
+        "repo": "homebrew-riscv",
+        "type": "github"
+      }
+    },
     "nix-homebrew": {
       "inputs": {
         "brew-src": "brew-src"
@@ -182,6 +198,7 @@
         "homebrew-bundle": "homebrew-bundle",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
+        "homebrew-riscv": "homebrew-riscv",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_2"
       }
