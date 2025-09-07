@@ -44,6 +44,7 @@ in
       "microsoft-outlook" = 985367838;
       "xcode" = 497799835;
       "microsoft-word" = 462054704;
+      "whatsapp-messenger" = 310633997;
     };
   };
 
