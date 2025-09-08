@@ -40,6 +40,7 @@ with pkgs;
   noto-fonts
   noto-fonts-emoji
   meslo-lgs-nf
+  spotify
 
   # Node.js development tools
   nodePackages.npm # globally install npm
