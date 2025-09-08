@@ -26,4 +26,7 @@ _:
 
   # Browsers
   "google-chrome"
+
+  # Utilities
+  "coconutbattery"
 ]
