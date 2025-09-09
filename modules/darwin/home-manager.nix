@@ -46,6 +46,7 @@ in
       "xcode" = 497799835;
       "microsoft-word" = 462054704;
       "whatsapp-messenger" = 310633997;
+      "copilot" = 1447330651;
     };
   };
 
