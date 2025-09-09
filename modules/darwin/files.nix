@@ -87,8 +87,8 @@ in
 
       alt-f = 'fullscreen'
 
-      alt-s = 'layout v_accordion' # 'layout stacking' in i3
-      alt-w = 'layout h_accordion' # 'layout tabbed' in i3
+      alt-shift-s = 'layout v_accordion' # 'layout stacking' in i3
+      alt-shift-w = 'layout h_accordion' # 'layout tabbed' in i3
       # added shift because it otherwise conflicts with typing accute accent on macOS
       alt-shift-e = 'layout tiles horizontal vertical' # 'layout toggle split' in i3
 
