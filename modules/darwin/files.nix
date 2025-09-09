@@ -114,6 +114,7 @@ in
       alt-0 = 'workspace 10'
       alt-c = 'workspace c'
       alt-m = 'workspace m'
+      alt-s = 'workspace slack'
 
       alt-shift-1 = 'move-node-to-workspace 1'
       alt-shift-2 = 'move-node-to-workspace 2'
