@@ -112,8 +112,8 @@ in
       alt-8 = 'workspace 8'
       alt-9 = 'workspace 9'
       alt-0 = 'workspace 10'
-      alt-c = 'workspace c'
-      alt-m = 'workspace m'
+      alt-c = 'workspace cal'
+      alt-m = 'workspace mail'
       alt-s = 'workspace slack'
       alt-x = 'workspace nix'
 
