@@ -47,6 +47,7 @@ in
       "microsoft-word" = 462054704;
       "whatsapp-messenger" = 310633997;
       "copilot" = 1447330651;
+      "vimlike" = 1584519802;
     };
   };
 
