@@ -19,6 +19,7 @@ with pkgs;
   gh
   nixfmt-rfc-style
   qemu
+  cmake
 
   # Encryption and security tools
   age
