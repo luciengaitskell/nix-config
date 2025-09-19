@@ -17,6 +17,8 @@ _:
 
   # Utility Tools
   "syncthing"
+  "lunar"
+
 
   # Entertainment Tools
   "vlc"
