@@ -273,6 +273,14 @@ let name = "Luc Gaitskell";
           )
         ];
       };
+      "grater" = {
+        hostname = "grater.local";
+        user = "lucg";
+      };
+      "j" = {
+        hostname = "j.lucg.xyz";
+        user = "lucg";
+      };
     };
   };
 
