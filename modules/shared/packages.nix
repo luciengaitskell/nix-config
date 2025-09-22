@@ -74,6 +74,7 @@ with pkgs;
 
   # Embedded dev
   platformio
+  gcc-arm-embedded
 
   # Hardware dev
   verible
