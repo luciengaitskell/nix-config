@@ -43,6 +43,7 @@ with pkgs;
   noto-fonts-emoji
   meslo-lgs-nf
   spotify
+  pandoc
 
   # Node.js development tools
   nodePackages.npm # globally install npm
