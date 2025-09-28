@@ -20,7 +20,7 @@ with pkgs;
   nixfmt-rfc-style
   qemu
   cmake
-  bear
+  compiledb
 
   # Encryption and security tools
   age
