@@ -44,6 +44,7 @@ with pkgs;
   meslo-lgs-nf
   spotify
   pandoc
+  poppler-utils
 
   # Node.js development tools
   nodePackages.npm # globally install npm
