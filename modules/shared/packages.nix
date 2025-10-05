@@ -21,6 +21,7 @@ with pkgs;
   qemu
   cmake
   compiledb
+  yubikey-manager
 
   # Encryption and security tools
   age
