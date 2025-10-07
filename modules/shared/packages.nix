@@ -19,7 +19,7 @@ with pkgs;
   gh
   nixfmt-rfc-style
   qemu
-  cmake
+  # cmake
   compiledb
   yubikey-manager
 

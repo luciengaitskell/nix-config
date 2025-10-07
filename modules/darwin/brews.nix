@@ -6,4 +6,5 @@ _:
   # RISC-V GNU toolchain
   "riscv/riscv/riscv-gnu-toolchain"
   "riscv64-elf-gdb"
+  "cmake"
 ]
