@@ -82,6 +82,7 @@ with pkgs;
   # Hardware dev
   verible
   iverilog
+  verilator
   surfer
   openfpgaloader
   pulseview
