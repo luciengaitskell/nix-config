@@ -7,4 +7,5 @@ shared-packages ++ [
   aerospace
   swiftlint
   utm
+  autoraise
 ]
