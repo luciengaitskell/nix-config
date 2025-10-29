@@ -51,6 +51,8 @@ in
 
       # Mouse follows focus when focused monitor changes
       on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+      # Mouse follows focus when focused window changes, necessary for compatability with AutoRaise
+      on-focus-changed = ['move-mouse window-lazy-center']
 
       [mode.main.binding]
           # See: https://nikitabobko.github.io/AeroSpace/goodies#open-a-new-window-with-applescript
