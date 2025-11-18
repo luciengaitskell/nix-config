@@ -38,10 +38,10 @@ with pkgs;
   poppler-utils
 
   # Node.js development tools
-  nodePackages.npm # globally install npm
-  nodePackages.prettier
-  nodejs_24
-  yarn
+  # nodePackages.npm # globally install npm
+  # nodePackages.prettier
+  # nodejs_24
+  # yarn
 
   # Text and terminal utilities
   htop
