@@ -63,6 +63,7 @@ with pkgs;
   fzf
   # direnv
   qemu
+  cmake
   compiledb
 
   # Programming languages and runtimes
