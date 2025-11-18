@@ -61,7 +61,7 @@ with pkgs;
   awscli2
   lazygit
   fzf
-  direnv
+  # direnv
   qemu
   compiledb
 
