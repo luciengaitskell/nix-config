@@ -8,6 +8,8 @@ let user = "lucg"; in
     ../../modules/shared
   ];
 
+  ids.gids.nixbld = 30000;
+
   nix = {
     package = pkgs.nix;
 
