@@ -6,7 +6,6 @@ shared-packages ++ [
 
   # Security and authentication
   yubikey-agent
-  keepassxc
 
   # App and package management
   appimage-run
@@ -15,30 +14,22 @@ shared-packages ++ [
   home-manager
 
   # Media and design tools
-  vlc
   fontconfig
-  font-manager
 
   # Productivity tools
-  bc # old school calculator
-  galculator
 
   # Audio tools
   pavucontrol # Pulse audio controls
 
   # Testing and development tools
-  direnv
   rofi
   rofi-calc
-  postgresql
   libtool # for Emacs vterm
 
   # Screenshot and recording tools
   flameshot
 
   # Text and terminal utilities
-  feh # Manage wallpapers
-  screenkey
   tree
   unixtools.ifconfig
   unixtools.netstat
@@ -48,20 +39,19 @@ shared-packages ++ [
 
   # File and system utilities
   inotify-tools # inotifywait, inotifywatch - For file system events
-  i3lock-fancy-rapid
   libnotify
   pcmanfm # File browser
   sqlite
   xdg-utils
 
   # Other utilities
-  yad # yad-calendar is used with polybar
-  xdotool
   google-chrome
 
   # PDF viewer
   zathura
 
+  # Development tools
+  firefox
+  
   # Music and entertainment
-  spotify
 ]

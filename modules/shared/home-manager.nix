@@ -21,7 +21,7 @@ let name = "Luc Gaitskell";
       }
     ];
 
-    initExtraFirst = ''
+    initContent = lib.mkBefore ''
       if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
         . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
         . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
@@ -178,7 +178,8 @@ let name = "Luc Gaitskell";
         \ ]
 
       let g:startify_bookmarks = [
-        \ '~/.local/share/src',
+        \ '~/Projects',
+        \ '~/Documents',
         \ ]
 
       let g:airline_theme='bubblegum'
@@ -210,14 +211,6 @@ let name = "Luc Gaitskell";
           (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 10)
           (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 14)
         ];
-      };
-
-      dynamic_padding = true;
-      decorations = "full";
-      title = "Terminal";
-      class = {
-        instance = "Alacritty";
-        general = "Alacritty";
       };
 
       colors = {
@@ -253,6 +246,7 @@ let name = "Luc Gaitskell";
 
   ssh = {
     enable = true;
+    enableDefaultConfig = false;
     includes = [
       (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
         "/home/${user}/.ssh/config_external"
@@ -262,6 +256,11 @@ let name = "Luc Gaitskell";
       )
     ];
     matchBlocks = {
+      "*" = {
+        # Set the default values we want to keep
+        sendEnv = [ "LANG" "LC_*" ];
+        hashKnownHosts = true;
+      };
       "github.com" = {
         identitiesOnly = true;
         identityFile = [
