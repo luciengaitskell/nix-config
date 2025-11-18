@@ -86,7 +86,6 @@ with pkgs;
   gcc-arm-embedded
 
   # Hardware dev
-  verible
   iverilog
   verilator
   surfer
