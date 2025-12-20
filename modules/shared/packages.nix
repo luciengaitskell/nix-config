@@ -92,6 +92,7 @@ with pkgs;
   surfer
   openfpgaloader
   pulseview
+  yosys
 
   # LaTeX
   texlive.combined.scheme-full
