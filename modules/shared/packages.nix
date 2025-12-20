@@ -4,30 +4,21 @@ with pkgs;
 [
   # General packages for development and system management
   alacritty
-  aspell
-  aspellDicts.en
   bash-completion
   bat
   btop
   coreutils
   killall
-  neofetch
   openssh
   sqlite
   wget
   zip
-  gh
   nixfmt-rfc-style
-  qemu
-  # cmake
-  compiledb
   yubikey-manager
 
   # Encryption and security tools
   age
-  age-plugin-yubikey
   gnupg
-  libfido2
 
   # Cloud-related tools and SDKs
   docker
@@ -36,37 +27,53 @@ with pkgs;
   # Media-related packages
   emacs-all-the-icons-fonts
   dejavu_fonts
-  ffmpeg
   fd
   font-awesome
   hack-font
   noto-fonts
-  noto-fonts-emoji
+  noto-fonts-color-emoji
   meslo-lgs-nf
   spotify
   pandoc
   poppler-utils
 
   # Node.js development tools
-  nodePackages.npm # globally install npm
-  nodePackages.prettier
-  nodejs
-  yarn
+  # nodePackages.npm # globally install npm
+  # nodePackages.prettier
+  # nodejs_24
+  # yarn
 
   # Text and terminal utilities
   htop
-  hunspell
-  iftop
   jetbrains-mono
   jq
   ripgrep
   tree
   tmux
-  unrar
   unzip
   zsh-powerlevel10k
 
+  # Development tools
+  curl
+  gh
+  terraform
+  kubectl
+  awscli2
+  lazygit
+  fzf
+  # direnv
+  qemu
+  cmake
+  compiledb
+
+  # Programming languages and runtimes
+  go
+  rustc
+  cargo
+  openjdk
+
   # Python packages
+  python3
   uv
 
   # Dev tools
@@ -80,7 +87,6 @@ with pkgs;
   gcc-arm-embedded
 
   # Hardware dev
-  verible
   iverilog
   verilator
   surfer

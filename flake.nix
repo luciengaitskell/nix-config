@@ -27,13 +27,17 @@
       url = "github:riscv/homebrew-riscv";
       flake = false;
     };
+    homebrew-verible = {
+      url = "github:chipsalliance/homebrew-verible";
+      flake = false;
+    };
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-riscv, home-manager, nixpkgs, disko } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, homebrew-riscv, homebrew-verible, home-manager, nixpkgs, disko } @inputs:
     let
       user = "lucg";
       linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
@@ -59,6 +63,7 @@
       mkLinuxApps = system: {
         "apply" = mkApp "apply" system;
         "build-switch" = mkApp "build-switch" system;
+        "clean" = mkApp "clean" system;
         "copy-keys" = mkApp "copy-keys" system;
         "create-keys" = mkApp "create-keys" system;
         "check-keys" = mkApp "check-keys" system;
@@ -68,6 +73,7 @@
         "apply" = mkApp "apply" system;
         "build" = mkApp "build" system;
         "build-switch" = mkApp "build-switch" system;
+        "clean" = mkApp "clean" system;
         "copy-keys" = mkApp "copy-keys" system;
         "create-keys" = mkApp "create-keys" system;
         "check-keys" = mkApp "check-keys" system;
@@ -96,6 +102,7 @@
                   "homebrew/homebrew-cask" = homebrew-cask;
                   "homebrew/homebrew-bundle" = homebrew-bundle;
                   "riscv/homebrew-riscv" = homebrew-riscv;
+                  "chipsalliance/homebrew-verible" = homebrew-verible;
                 };
                 mutableTaps = false;
                 autoMigrate = true;

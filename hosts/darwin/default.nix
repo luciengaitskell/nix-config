@@ -8,6 +8,8 @@ let user = "lucg"; in
     ../../modules/shared
   ];
 
+  ids.gids.nixbld = 30000;
+
   nix = {
     package = pkgs.nix;
 
@@ -48,7 +50,7 @@ let user = "lucg"; in
   system = {
     checks.verifyNixPath = false;
     primaryUser = user;
-    stateVersion = 4;
+    stateVersion = 5;
 
     defaults = {
       NSGlobalDomain = {
