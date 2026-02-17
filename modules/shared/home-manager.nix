@@ -260,6 +260,7 @@ let name = "Luc Gaitskell";
         # Set the default values we want to keep
         sendEnv = [ "LANG" "LC_*" ];
         hashKnownHosts = true;
+        identitiesOnly = true;
       };
       "github.com" = {
         identitiesOnly = true;
