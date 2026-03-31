@@ -15,6 +15,7 @@ with pkgs;
   zip
   nixfmt-rfc-style
   yubikey-manager
+  tailscale
 
   # Encryption and security tools
   age
