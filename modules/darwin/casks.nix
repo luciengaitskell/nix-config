@@ -2,7 +2,7 @@ _:
 
 [
   # Development Tools
-  "homebrew/cask/docker"
+  "docker-desktop"
   "tower"
   "balenaetcher"
   "raspberry-pi-imager"
@@ -16,7 +16,6 @@ _:
   "zoom"
 
   # Utility Tools
-  "syncthing"
   "lunar"
 
   # Entertainment Tools

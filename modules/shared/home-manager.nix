@@ -62,6 +62,9 @@ in
   git = {
     enable = true;
     ignores = [ "*.swp" ];
+    signing = {
+      format = "openpgp";
+    };
     lfs = {
       enable = true;
     };

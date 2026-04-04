@@ -13,7 +13,7 @@ with pkgs;
   sqlite
   wget
   zip
-  nixfmt-rfc-style
+  nixfmt
   yubikey-manager
   tailscale
 
