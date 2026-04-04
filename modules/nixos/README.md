@@ -101,7 +101,6 @@ After your first boot, here are the essential hotkeys to get started with the bs
 - **Super + Tab** - Switch to last workspace
 
 ### Applications
-- **Super + Alt + Enter** - Open Emacs
 - **Ctrl + Alt + Enter** - Open web browser
 - **Super + Shift + Space** - Open file manager
 - **Super + Shift + x** - Open KeePassXC password manager
