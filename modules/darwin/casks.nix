@@ -19,7 +19,6 @@ _:
   "syncthing"
   "lunar"
 
-
   # Entertainment Tools
   "vlc"
 
