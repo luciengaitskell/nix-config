@@ -347,7 +347,7 @@ in
   ];
 
   environment.systemPackages = with pkgs; [
-    gitAndTools.gitFull
+    gitFull
     inetutils
   ];
 

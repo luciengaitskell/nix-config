@@ -12,7 +12,7 @@
   # 2. Set EMACS_CONFIG_ORG environment variable to point to your config.org location
   # 3. Uncomment below to have Nix manage the file:
   #
-  ".config/emacs/config.org" = {
-    text = builtins.readFile ../shared/config/emacs/config.org;
-  };
+  # ".config/emacs/config.org" = {
+  #   text = builtins.readFile ../shared/config/emacs/config.org;
+  # };
 }

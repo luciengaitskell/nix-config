@@ -13,6 +13,7 @@ shared-packages
   # App and package management
   appimage-run
   gnumake
+  cmake
   home-manager
 
   # Media and design tools
