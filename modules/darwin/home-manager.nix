@@ -1,4 +1,10 @@
-{ config, pkgs, lib, home-manager, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  home-manager,
+  ...
+}:
 
 let
   user = "lucg";
@@ -12,7 +18,7 @@ let
 in
 {
   imports = [
-   ./dock
+    ./dock
   ];
 
   # It me
@@ -25,8 +31,8 @@ in
 
   homebrew = {
     enable = true;
-    casks = pkgs.callPackage ./casks.nix {};
-    brews = pkgs.callPackage ./brews.nix {};
+    casks = pkgs.callPackage ./casks.nix { };
+    brews = pkgs.callPackage ./brews.nix { };
     onActivation.cleanup = "zap";
 
     # These app IDs are from using the mas CLI app
@@ -55,23 +61,30 @@ in
   # Enable home-manager
   home-manager = {
     useGlobalPkgs = true;
-    users.${user} = { pkgs, config, lib, ... }:{
-      home = {
-        enableNixpkgsReleaseCheck = false;
-        packages = pkgs.callPackage ./packages.nix {};
-        file = lib.mkMerge [
-          sharedFiles
-          additionalFiles
-          { "emacs-launcher.command".source = myEmacsLauncher; }
-        ];
-        stateVersion = "23.11";
-      };
-      programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib; };
+    users.${user} =
+      {
+        pkgs,
+        config,
+        lib,
+        ...
+      }:
+      {
+        home = {
+          enableNixpkgsReleaseCheck = false;
+          packages = pkgs.callPackage ./packages.nix { };
+          file = lib.mkMerge [
+            sharedFiles
+            additionalFiles
+            { "emacs-launcher.command".source = myEmacsLauncher; }
+          ];
+          stateVersion = "23.11";
+        };
+        programs = { } // import ../shared/home-manager.nix { inherit config pkgs lib; };
 
-      # Marked broken Oct 20, 2022 check later to remove this
-      # https://github.com/nix-community/home-manager/issues/3344
-      manual.manpages.enable = false;
-    };
+        # Marked broken Oct 20, 2022 check later to remove this
+        # https://github.com/nix-community/home-manager/issues/3344
+        manual.manpages.enable = false;
+      };
   };
 
   # Fully declarative dock using the latest from Nix Store
@@ -85,7 +98,7 @@ in
       { path = "${pkgs.alacritty}/Applications/Alacritty.app/"; }
       { path = "/System/Applications/Music.app/"; }
       { path = "/System/Applications/News.app/"; }
-      { path = "/System/Applications/Photos.app/"; }      
+      { path = "/System/Applications/Photos.app/"; }
       { path = "/System/Applications/System Settings.app/"; }
       {
         path = toString myEmacsLauncher;

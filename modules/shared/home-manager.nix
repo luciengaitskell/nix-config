@@ -1,8 +1,15 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
-let name = "Luc Gaitskell";
-    user = "lucg";
-    email = "me@lucg.xyz"; in
+let
+  name = "Luc Gaitskell";
+  user = "lucg";
+  email = "me@lucg.xyz";
+in
 {
   # Shared shell configuration
   zsh = {
@@ -68,7 +75,7 @@ let name = "Luc Gaitskell";
     extraConfig = {
       init.defaultBranch = "main";
       core = {
-	    editor = "vim";
+        editor = "vim";
         autocrlf = "input";
       };
       pull.rebase = true;
@@ -78,8 +85,15 @@ let name = "Luc Gaitskell";
 
   vim = {
     enable = true;
-    plugins = with pkgs.vimPlugins; [ vim-airline vim-airline-themes vim-startify vim-tmux-navigator ];
-    settings = { ignorecase = true; };
+    plugins = with pkgs.vimPlugins; [
+      vim-airline
+      vim-airline-themes
+      vim-startify
+      vim-tmux-navigator
+    ];
+    settings = {
+      ignorecase = true;
+    };
     extraConfig = ''
       "" General
       set number
@@ -184,8 +198,8 @@ let name = "Luc Gaitskell";
 
       let g:airline_theme='bubblegum'
       let g:airline_powerline_fonts = 1
-      '';
-     };
+    '';
+  };
 
   alacritty = {
     enable = true;
@@ -200,6 +214,13 @@ let name = "Luc Gaitskell";
           x = 24;
           y = 24;
         };
+      };
+
+      # Fix for shell path when launching from desktop
+      # When launching from desktop, $SHELL may point to /bin/zsh instead of
+      # the Nix-managed shell, causing environment issues
+      terminal.shell = {
+        program = "${pkgs.zsh}/bin/zsh";
       };
 
       font = {
@@ -248,29 +269,24 @@ let name = "Luc Gaitskell";
     enable = true;
     enableDefaultConfig = false;
     includes = [
-      (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-        "/home/${user}/.ssh/config_external"
-      )
-      (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
-        "/Users/${user}/.ssh/config_external"
-      )
+      (lib.mkIf pkgs.stdenv.hostPlatform.isLinux "/home/${user}/.ssh/config_external")
+      (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin "/Users/${user}/.ssh/config_external")
     ];
     matchBlocks = {
       "*" = {
         # Set the default values we want to keep
-        sendEnv = [ "LANG" "LC_*" ];
+        sendEnv = [
+          "LANG"
+          "LC_*"
+        ];
         hashKnownHosts = true;
         identitiesOnly = true;
       };
       "github.com" = {
         identitiesOnly = true;
         identityFile = [
-          (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-            "/home/${user}/.ssh/id_github"
-          )
-          (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
-            "/Users/${user}/.ssh/id_github"
-          )
+          (lib.mkIf pkgs.stdenv.hostPlatform.isLinux "/home/${user}/.ssh/id_github")
+          (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin "/Users/${user}/.ssh/id_github")
         ];
       };
     };
@@ -286,7 +302,7 @@ let name = "Luc Gaitskell";
       {
         plugin = power-theme;
         extraConfig = ''
-           set -g @tmux_power_theme 'gold'
+          set -g @tmux_power_theme 'gold'
         '';
       }
       {
@@ -357,6 +373,6 @@ let name = "Luc Gaitskell";
       bind-key -T copy-mode-vi 'C-k' select-pane -U
       bind-key -T copy-mode-vi 'C-l' select-pane -R
       bind-key -T copy-mode-vi 'C-\' select-pane -l
-      '';
-    };
+    '';
+  };
 }
