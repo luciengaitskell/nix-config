@@ -26,6 +26,12 @@ in
 
   homebrew = {
     enable = true;
+    taps = [
+      # alleviates 'error' / warning about attempting to untap homebrew/cask
+      "homebrew/homebrew-cask"
+      "homebrew/homebrew-bundle"
+      # "homebrew/homebrew-core" # seemingly not necessary
+    ];
     casks = pkgs.callPackage ./casks.nix { };
     brews = pkgs.callPackage ./brews.nix { };
     onActivation.cleanup = "zap";
