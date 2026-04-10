@@ -78,6 +78,7 @@ with pkgs;
 
   # Dev tools
   vscode
+  antigravity
 
   # Compilers
   gfortran14
