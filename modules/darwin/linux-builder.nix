@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, ... }:
 
 {
   nix = {
@@ -8,6 +8,7 @@
       enable = true;
       systems = [ "aarch64-linux" ];
       config = {
+        virtualisation.cores = lib.mkForce 4;
         nix.settings = {
           "download-buffer-size" = 134217728;
         };
