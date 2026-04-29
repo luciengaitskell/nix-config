@@ -29,4 +29,7 @@ _:
 
   # Utilities
   "coconutbattery"
+
+  # EE
+  "kicad"
 ]
