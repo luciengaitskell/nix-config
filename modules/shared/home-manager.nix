@@ -14,6 +14,7 @@ in
   # Shared shell configuration
   zsh = {
     enable = true;
+    enableCompletion = false;
     autocd = false;
     plugins = [
       {
@@ -28,7 +29,8 @@ in
       }
     ];
 
-    initContent = lib.mkBefore ''
+    initContent = lib.mkMerge [
+      (lib.mkBefore ''
       if [[ -z "$IN_NIX_SHELL" ]] && [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
         . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
         . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
@@ -42,10 +44,19 @@ in
       [[ -d "$XDG_CACHE_HOME/zsh" ]] || mkdir -p "$XDG_CACHE_HOME/zsh"
       export ZSH_COMPDUMP="$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
 
+      # TEMP: diagnose intermittent gitstatusd init hangs/failures.
+      # Logs land in /tmp/gitstatus.*.log. Remove once root cause is known.
+      export GITSTATUS_LOG_LEVEL=DEBUG
+
       # Define variables for directories
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
       export PATH=$HOME/.local/share/bin:$PATH
+
+      # VS Code (and other tools) spawn `zsh -lic` to probe PATH; their stdout
+      # is a pipe, not a TTY. p10k/gitstatusd/compinit can block in that mode
+      # and the probe never returns. Skip heavy init when there is no TTY.
+      [[ -t 1 ]] || return 0
 
       # Remove history data we don't want to see
       export HISTIGNORE="pwd:ls:cd"
@@ -64,7 +75,17 @@ in
 
       # Always color ls and group directories
       alias ls='ls --color=auto'
-    '';
+      '')
+      (lib.mkAfter ''
+      # Initialize completion after plugins; avoid compdump rebuilds.
+      autoload -Uz compinit
+      if [[ -f "$ZSH_COMPDUMP" ]]; then
+        compinit -C -D -d "$ZSH_COMPDUMP"
+      else
+        compinit -C -d "$ZSH_COMPDUMP"
+      fi
+      '')
+    ];
   };
 
   git = {

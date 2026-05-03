@@ -270,8 +270,10 @@
   # when accepting a command line. Supported values:
   typeset -g POWERLEVEL9K_TRANSIENT_PROMPT=off
 
-  # Instant prompt mode.
-  typeset -g POWERLEVEL9K_INSTANT_PROMPT=verbose
+  # Instant prompt's stdout-redirection trick interacts badly with `exec zsh`
+  # and can leave the shell in a half-loaded state where p10k functions are
+  # never defined. Real init is ~50ms — fast enough without instant prompt.
+  typeset -g POWERLEVEL9K_INSTANT_PROMPT=off
 
   # Hot reload allows you to change POWERLEVEL9K options after Powerlevel10k has been initialized.
   # For example, you can type POWERLEVEL9K_BACKGROUND=red and see your prompt turn red. Hot reload
