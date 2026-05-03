@@ -51,7 +51,6 @@ with pkgs;
   tree
   tmux
   unzip
-  zsh-powerlevel10k
 
   # Development tools
   curl

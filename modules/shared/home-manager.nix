@@ -16,18 +16,6 @@ in
     enable = true;
     enableCompletion = false;
     autocd = false;
-    plugins = [
-      {
-        name = "powerlevel10k";
-        src = pkgs.zsh-powerlevel10k;
-        file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-      }
-      {
-        name = "powerlevel10k-config";
-        src = lib.cleanSource ./config;
-        file = "p10k.zsh";
-      }
-    ];
 
     initContent = lib.mkMerge [
       (lib.mkBefore ''
@@ -44,18 +32,14 @@ in
       [[ -d "$XDG_CACHE_HOME/zsh" ]] || mkdir -p "$XDG_CACHE_HOME/zsh"
       export ZSH_COMPDUMP="$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
 
-      # TEMP: diagnose intermittent gitstatusd init hangs/failures.
-      # Logs land in /tmp/gitstatus.*.log. Remove once root cause is known.
-      export GITSTATUS_LOG_LEVEL=DEBUG
-
       # Define variables for directories
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
       export PATH=$HOME/.local/share/bin:$PATH
 
-      # VS Code (and other tools) spawn `zsh -lic` to probe PATH; their stdout
-      # is a pipe, not a TTY. p10k/gitstatusd/compinit can block in that mode
-      # and the probe never returns. Skip heavy init when there is no TTY.
+      # VS Code (and other tools) spawn `zsh -lic` to probe PATH; stdout is a
+      # pipe, not a TTY. Skip prompt/completion init in that mode so the probe
+      # exits promptly instead of leaking orphan shells.
       [[ -t 1 ]] || return 0
 
       # Remove history data we don't want to see
@@ -86,6 +70,11 @@ in
       fi
       '')
     ];
+  };
+
+  starship = {
+    enable = true;
+    enableZshIntegration = true;
   };
 
   git = {
