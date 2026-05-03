@@ -34,6 +34,14 @@ in
         . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
       fi
 
+      # Speed up completion init and avoid per-host zcompdump churn.
+      export ZSH_DISABLE_COMPFIX="true"
+      if [[ -z "''${XDG_CACHE_HOME-}" ]]; then
+        export XDG_CACHE_HOME="$HOME/.cache"
+      fi
+      [[ -d "$XDG_CACHE_HOME/zsh" ]] || mkdir -p "$XDG_CACHE_HOME/zsh"
+      export ZSH_COMPDUMP="$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
+
       # Define variables for directories
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
