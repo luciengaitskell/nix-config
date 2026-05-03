@@ -14,33 +14,18 @@ in
   # Shared shell configuration
   zsh = {
     enable = true;
-    enableCompletion = false;
     autocd = false;
 
-    initContent = lib.mkMerge [
-      (lib.mkBefore ''
+    initContent = lib.mkBefore ''
       if [[ -z "$IN_NIX_SHELL" ]] && [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
         . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
         . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
       fi
 
-      # Speed up completion init and avoid per-host zcompdump churn.
-      export ZSH_DISABLE_COMPFIX="true"
-      if [[ -z "''${XDG_CACHE_HOME-}" ]]; then
-        export XDG_CACHE_HOME="$HOME/.cache"
-      fi
-      [[ -d "$XDG_CACHE_HOME/zsh" ]] || mkdir -p "$XDG_CACHE_HOME/zsh"
-      export ZSH_COMPDUMP="$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
-
       # Define variables for directories
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
       export PATH=$HOME/.local/share/bin:$PATH
-
-      # VS Code (and other tools) spawn `zsh -lic` to probe PATH; stdout is a
-      # pipe, not a TTY. Skip prompt/completion init in that mode so the probe
-      # exits promptly instead of leaking orphan shells.
-      [[ -t 1 ]] || return 0
 
       # Remove history data we don't want to see
       export HISTIGNORE="pwd:ls:cd"
@@ -59,17 +44,7 @@ in
 
       # Always color ls and group directories
       alias ls='ls --color=auto'
-      '')
-      (lib.mkAfter ''
-      # Initialize completion after plugins; avoid compdump rebuilds.
-      autoload -Uz compinit
-      if [[ -f "$ZSH_COMPDUMP" ]]; then
-        compinit -C -D -d "$ZSH_COMPDUMP"
-      else
-        compinit -C -d "$ZSH_COMPDUMP"
-      fi
-      '')
-    ];
+    '';
   };
 
   starship = {
