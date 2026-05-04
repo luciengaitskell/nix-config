@@ -46,10 +46,20 @@ log "Authorized $(wc -l < "$SSH_KEY_DIR/authorized_keys" | tr -d ' ') key(s)."
 
 export DEVVM_AUTHORIZED_KEYS_FILE="$SSH_KEY_DIR/authorized_keys"
 
+# Single build of all the artifacts the launcher needs. devVmInfo references
+# everything via store paths so realising it covers the closure; building all
+# four explicitly is just slightly faster on a cold cache. NIX_PATH= silences
+# the channels-missing warning that --impure provokes; warn-dirty=false hides
+# the dirty-tree warning since this flake is intentionally read while you edit.
 log "Building devvm…"
-INFO=$(nix --extra-experimental-features 'nix-command flakes' build \
+INFO=$(NIX_PATH= nix --extra-experimental-features 'nix-command flakes' build \
   --impure --no-link --print-out-paths \
-  "${FLAKE}#nixosConfigurations.devvm.config.system.build.devVmInfo")
+  --option warn-dirty false \
+  "${FLAKE}#nixosConfigurations.devvm.config.system.build.devVmInfo" \
+  "${FLAKE}#nixosConfigurations.devvm.config.system.build.toplevel" \
+  "${FLAKE}#nixosConfigurations.devvm.config.system.build.initialRamdisk" \
+  "${FLAKE}#nixosConfigurations.devvm.config.system.build.devVmBlankDisk" \
+  | head -1)
 
 KERNEL=$(jq -r .kernel        "$INFO")
 INITRD=$(jq -r .initrd        "$INFO")
@@ -59,12 +69,6 @@ REGINFO=$(jq -r .regInfo      "$INFO")
 BLANK_DISK=$(jq -r .blankDisk "$INFO")
 SERIAL=$(jq  -r .serialConsole "$INFO")
 SSH_USER=$(jq -r .sshUser     "$INFO")
-
-# Also realise the toplevel/initrd/regInfo/blankDisk into the local store.
-nix --extra-experimental-features 'nix-command flakes' build --impure --no-link \
-  "${FLAKE}#nixosConfigurations.devvm.config.system.build.toplevel" \
-  "${FLAKE}#nixosConfigurations.devvm.config.system.build.initialRamdisk" \
-  "${FLAKE}#nixosConfigurations.devvm.config.system.build.devVmBlankDisk"
 
 log "Creating worktree at $WORKTREE on branch $BRANCH"
 mkdir -p "$SANDBOX_ROOT"
@@ -160,14 +164,11 @@ SSH_RC=0
 ssh $SSH_OPTS -o LogLevel=ERROR \
   -t "${SSH_USER}@127.0.0.1" 'cd /mnt/work && exec $SHELL -l' || SSH_RC=$?
 
-# Diagnostics only when ssh failed AND the VM is still alive — a clean
-# `sudo poweroff` from inside also returns non-zero (255: connection closed),
-# which isn't worth noisy diagnostics.
-if [ "$SSH_RC" -ne 0 ] && [ "$SSH_RC" -ne 130 ] && kill -0 "$QEMU_PID" 2>/dev/null; then
-  log "ssh exited $SSH_RC. Re-running with -v for diagnostics:"
-  ssh $SSH_OPTS -v -o BatchMode=yes "${SSH_USER}@127.0.0.1" true 2>&1 \
-    | sed 's/^/    /' >&2 || true
-  log "Tail of VM serial log:"
+# Only ssh's internal errors (handshake/network/auth) use RC=255; any other
+# non-zero exit is just the remote shell propagating the last command's exit
+# code, which isn't a sandbox failure. Gate diagnostics to 255 only.
+if [ "$SSH_RC" -eq 255 ] && kill -0 "$QEMU_PID" 2>/dev/null; then
+  log "ssh failed to connect (rc=255). Tail of VM serial log:"
   tail -n 120 "$SERIAL_LOG" 2>/dev/null | sed 's/^/    /' >&2 || true
 fi
 
