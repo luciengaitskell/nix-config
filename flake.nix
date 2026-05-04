@@ -109,6 +109,7 @@
         "create-keys" = mkApp "create-keys" system;
         "check-keys" = mkApp "check-keys" system;
         "rollback" = mkApp "rollback" system;
+        "sandbox" = mkApp "sandbox" system;
       };
     in
     {
@@ -147,24 +148,32 @@
         }
       );
 
-      nixosConfigurations = nixpkgs.lib.genAttrs linuxSystems (
-        system:
-        nixpkgs.lib.nixosSystem {
-          inherit system;
-          specialArgs = inputs;
-          modules = [
-            disko.nixosModules.disko
-            home-manager.nixosModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                users.${user} = import ./modules/nixos/home-manager.nix;
-              };
-            }
-            ./hosts/nixos
-          ];
-        }
-      );
+      nixosConfigurations =
+        (nixpkgs.lib.genAttrs linuxSystems (
+          system:
+          nixpkgs.lib.nixosSystem {
+            inherit system;
+            specialArgs = inputs;
+            modules = [
+              disko.nixosModules.disko
+              home-manager.nixosModules.home-manager
+              {
+                home-manager = {
+                  useGlobalPkgs = true;
+                  useUserPackages = true;
+                  users.${user} = import ./modules/nixos/home-manager.nix;
+                };
+              }
+              ./hosts/nixos
+            ];
+          }
+        ))
+        // {
+          devvm = nixpkgs.lib.nixosSystem {
+            system = "aarch64-linux";
+            specialArgs = inputs;
+            modules = [ ./modules/nixos/devvm.nix ];
+          };
+        };
     };
 }
