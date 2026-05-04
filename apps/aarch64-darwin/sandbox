@@ -37,24 +37,42 @@ INITRD=$(jq -r .initrd        "$INFO")
 INIT=$(jq   -r .init          "$INFO")
 KPARAMS_FILE=$(jq -r .kernelParamsFile "$INFO")
 REGINFO=$(jq -r .regInfo      "$INFO")
+BLANK_DISK=$(jq -r .blankDisk "$INFO")
 SERIAL=$(jq  -r .serialConsole "$INFO")
 SSH_USER=$(jq -r .sshUser     "$INFO")
 
-# Also realise the toplevel/initrd/regInfo into the local store.
+# Also realise the toplevel/initrd/regInfo/blankDisk into the local store.
 nix --extra-experimental-features 'nix-command flakes' build --no-link \
   "${FLAKE}#nixosConfigurations.devvm.config.system.build.toplevel" \
-  "${FLAKE}#nixosConfigurations.devvm.config.system.build.initialRamdisk"
+  "${FLAKE}#nixosConfigurations.devvm.config.system.build.initialRamdisk" \
+  "${FLAKE}#nixosConfigurations.devvm.config.system.build.devVmBlankDisk"
 
 log "Creating worktree at $WORKTREE on branch $BRANCH"
 mkdir -p "$SANDBOX_ROOT"
 git -C "$REPO_ROOT" worktree add -b "$BRANCH" "$WORKTREE" >/dev/null
 
-# Per-session state lives next to the worktree but outside it (so the VM
-# can't see it). Disk image is the writable overlay for /nix/.rw-store.
-STATE_DIR="${WORKTREE}.state"
-mkdir -p "$STATE_DIR"
-DISK_IMG="$STATE_DIR/devvm.qcow2"
-qemu-img create -f qcow2 "$DISK_IMG" 8G >/dev/null
+# No per-session disk image: -snapshot below makes QEMU open the backing
+# qcow2 read-only and write all dirty blocks to a temp file in $TMPDIR,
+# which it deletes on exit. macOS file cache means hot blocks stay in RAM.
+
+# Per-session ssh authorized_keys built from host's ~/.ssh/*.pub AND any
+# keys loaded in the host ssh-agent (covers Secretive / Secure Enclave keys
+# that don't have a regular private file). Mounted into the VM via 9p
+# (tag=hostkeys), which sshd reads via authorizedKeysFiles.
+SSH_KEY_DIR=$(mktemp -d "${TMPDIR:-/tmp}/devvm-hostkeys.XXXXXXXX")
+{
+  for k in "$HOME"/.ssh/*.pub; do
+    [ -f "$k" ] && cat "$k" && printf '\n'
+  done
+  ssh-add -L 2>/dev/null || true
+} | awk 'NF && !seen[$0]++' > "$SSH_KEY_DIR/authorized_keys"
+if [ ! -s "$SSH_KEY_DIR/authorized_keys" ]; then
+  fail "No SSH public keys found in \$HOME/.ssh/*.pub or ssh-agent. Generate one with ssh-keygen, or unlock your agent."
+fi
+chmod 644 "$SSH_KEY_DIR/authorized_keys"
+log "Authorized $(wc -l < "$SSH_KEY_DIR/authorized_keys" | tr -d ' ') key(s)."
+
+SERIAL_LOG="$SSH_KEY_DIR/serial.log"
 
 KPARAMS=$(cat "$KPARAMS_FILE")
 APPEND="${KPARAMS} init=${INIT} regInfo=${REGINFO} console=${SERIAL},115200n8"
@@ -64,8 +82,18 @@ cleanup() {
     kill "$QEMU_PID" 2>/dev/null || true
     wait "$QEMU_PID" 2>/dev/null || true
   fi
-  rm -f "$DISK_IMG"
-  rmdir "$STATE_DIR" 2>/dev/null || true
+  rm -rf "$SSH_KEY_DIR"
+  # ssh -t leaves the terminal in raw mode and the remote shell emits CSI
+  # device-status queries that the host terminal answers into stdin. Drain
+  # those replies so the parent shell doesn't read them as command input.
+  if [ -t 0 ]; then
+    # Non-canonical, non-blocking read: time=1 (0.1s) min=0 → dd returns even
+    # if no input is available.
+    stty -icanon -echo min 0 time 1 2>/dev/null || true
+    dd if=/dev/tty of=/dev/null bs=1024 count=1 2>/dev/null || true
+    printf '\033[0m\033[?2004l\033[?1004l\033[?1l' 2>/dev/null || true
+    stty sane 2>/dev/null || true
+  fi
   ok ""
   ok "Sandbox session ended."
   ok "Worktree: $WORKTREE  (branch $BRANCH)"
@@ -88,39 +116,61 @@ QEMU_CPU="host"
   -cpu "$QEMU_CPU" \
   -m 4096 \
   -smp 4 \
-  -nographic \
-  -serial mon:stdio \
+  -display none \
+  -monitor none \
+  -serial "file:${SERIAL_LOG}" \
   -device virtio-rng-pci \
   -netdev "user,id=net0,hostfwd=tcp:127.0.0.1:${SSH_PORT}-:22" \
   -device virtio-net-pci,netdev=net0 \
-  -drive "file=${DISK_IMG},if=none,id=drive0,cache=writeback,format=qcow2" \
+  -snapshot \
+  -drive "file=${BLANK_DISK},if=none,id=drive0,format=qcow2" \
   -device virtio-blk-pci,drive=drive0 \
   -virtfs "local,path=/nix/store,security_model=none,mount_tag=nix-store,readonly=on" \
   -virtfs "local,path=${WORKTREE},security_model=mapped-xattr,mount_tag=workdir" \
+  -virtfs "local,path=${SSH_KEY_DIR},security_model=none,mount_tag=hostkeys,readonly=on" \
   -kernel "$KERNEL" \
   -initrd "$INITRD" \
-  -append "$APPEND" &
+  -append "$APPEND" </dev/null &
 QEMU_PID=$!
 
 log "Waiting for SSH on 127.0.0.1:${SSH_PORT}…"
+SSH_READY=0
 for _ in $(seq 1 90); do
   if nc -z 127.0.0.1 "$SSH_PORT" 2>/dev/null; then
+    SSH_READY=1
     break
   fi
   if ! kill -0 "$QEMU_PID" 2>/dev/null; then
-    fail "QEMU exited before SSH came up."
+    log "QEMU exited before SSH came up. Last serial output:"
+    tail -n 60 "$SERIAL_LOG" >&2 || true
+    fail "VM did not boot. See $SERIAL_LOG for full log."
   fi
   sleep 1
 done
+if [ "$SSH_READY" -ne 1 ]; then
+  log "Timed out waiting for SSH. Last serial output:"
+  tail -n 60 "$SERIAL_LOG" >&2 || true
+  fail "VM never opened ${SSH_PORT}. See $SERIAL_LOG."
+fi
 
 ok "Connecting…"
-ssh \
-  -p "$SSH_PORT" \
-  -o StrictHostKeyChecking=no \
-  -o UserKnownHostsFile=/dev/null \
-  -o LogLevel=ERROR \
-  -t "${SSH_USER}@127.0.0.1" 'cd /mnt/work && exec $SHELL -l' \
-  || true
+SSH_OPTS="-p $SSH_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+SSH_RC=0
+ssh $SSH_OPTS -o LogLevel=ERROR \
+  -t "${SSH_USER}@127.0.0.1" 'cd /mnt/work && exec $SHELL -l' || SSH_RC=$?
+if [ "$SSH_RC" -ne 0 ] && [ "$SSH_RC" -ne 130 ]; then
+  log "ssh exited $SSH_RC. Authorized fingerprints inside VM:"
+  ssh-keygen -l -f "$SSH_KEY_DIR/authorized_keys" 2>&1 \
+    | sed 's/^/    /' >&2 || true
+  log "Re-running with -v for diagnostics:"
+  ssh $SSH_OPTS -v -o BatchMode=yes "${SSH_USER}@127.0.0.1" true 2>&1 \
+    | sed 's/^/    /' >&2 || true
+  log "[devvm] lines from serial log:"
+  grep -F '[devvm]' "$SERIAL_LOG" 2>/dev/null | sed 's/^/    /' >&2 \
+    || echo "    (no [devvm] lines — import service did not run / not on console)" >&2
+  log "Tail of VM serial log:"
+  tail -n 120 "$SERIAL_LOG" 2>/dev/null | sed 's/^/    /' >&2 || true
+fi
 
 log "Shutting down VM…"
 ssh \
