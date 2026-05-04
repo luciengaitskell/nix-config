@@ -9,6 +9,13 @@
 let
   user = "lucg";
 
+  # The sandbox launcher writes a generated authorized_keys file (collected
+  # from the host's ~/.ssh/*.pub + ssh-add -L) and exports its path here.
+  # Reading via getEnv requires `nix build --impure`. Keeping this as an
+  # env var means the module has no host-specific paths baked in — anyone
+  # can supply their own keys file by setting this variable.
+  authorizedKeysFile = builtins.getEnv "DEVVM_AUTHORIZED_KEYS_FILE";
+
   closureInfo = pkgs.closureInfo {
     rootPaths = [ config.system.build.toplevel ];
   };
@@ -33,68 +40,35 @@ in
     };
   };
 
+  assertions = [{
+    assertion = authorizedKeysFile != "";
+    message = ''
+      devvm: DEVVM_AUTHORIZED_KEYS_FILE is unset.
+      Build with `nix build --impure` and export DEVVM_AUTHORIZED_KEYS_FILE
+      pointing to a file containing the authorized SSH public keys for the
+      VM's primary user (the sandbox launcher does this for you).
+    '';
+  }];
+
   users.mutableUsers = false;
-  # Authorized keys are injected at runtime by import-host-ssh-keys.service
-  # below, so the NixOS build sees no static credentials. Quiet the check.
-  users.allowNoPasswordLogin = true;
   users.users.${user} = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
     shell = pkgs.bashInteractive;
+    openssh.authorizedKeys.keyFiles =
+      lib.optional (authorizedKeysFile != "") (/. + authorizedKeysFile);
   };
 
   # NixOS's fstab→systemd path silently drops 9p mounts whose device is a
-  # mount tag (not a path). The .mount units never run, so we mount both
-  # 9p shares ourselves in a oneshot before sshd. Logs go to /dev/kmsg
-  # (kernel printk → console, unbuffered) so failures surface in the
-  # wrapper's serial tail dump even when sshd auth then fails.
-  systemd.services.devvm-setup = {
-    description = "Mount host 9p shares and import SSH authorized_keys";
-    wantedBy = [ "multi-user.target" "sshd.service" ];
-    before = [ "sshd.service" ];
-    after = [ "local-fs.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      StandardOutput = "journal+console";
-      StandardError = "journal+console";
-    };
-    path = [ pkgs.util-linux pkgs.openssh ];
-    script = ''
-      set -u
-      log() { echo "[devvm] $*" | tee /dev/kmsg; }
-      log "devvm-setup starting"
-      mount_9p() {
-        tag=$1
-        target=$2
-        opts=$3
-        if mountpoint -q "$target"; then
-          log "$target already mounted"
-          return 0
-        fi
-        mkdir -p "$target"
-        if mount -t 9p -o "$opts" "$tag" "$target" 2>&1 | tee /dev/kmsg; then
-          log "mounted $tag → $target"
-        else
-          log "FAIL: mount $tag → $target"
-          return 1
-        fi
-      }
-      mount_9p hostkeys /mnt/hostkeys "trans=virtio,version=9p2000.L,ro"
-      mount_9p workdir  /mnt/work     "trans=virtio,version=9p2000.L,msize=1048576"
-
-      src=/mnt/hostkeys/authorized_keys
-      dst=/home/${user}/.ssh/authorized_keys
-      if [ ! -f "$src" ]; then
-        log "FAIL: $src missing"
-        exit 1
-      fi
-      install -d -m 700 -o ${user} -g users /home/${user}/.ssh
-      install -m 600 -o ${user} -g users "$src" "$dst"
-      log "wrote $dst ($(wc -c < "$dst") bytes, $(wc -l < "$dst") lines)"
-      log "devvm-setup done"
-    '';
-  };
+  # mount tag (not a path); the auto-generated .mount unit never starts.
+  # systemd.mounts writes a unit file directly and bypasses that generator.
+  systemd.mounts = [{
+    what = "workdir";
+    where = "/mnt/work";
+    type = "9p";
+    options = "trans=virtio,version=9p2000.L,msize=1048576";
+    wantedBy = [ "multi-user.target" ];
+  }];
 
   security.sudo.wheelNeedsPassword = false;
 

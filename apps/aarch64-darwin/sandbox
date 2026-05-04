@@ -27,9 +27,28 @@ BRANCH="sandbox/${TS}"
 
 SSH_PORT="${SANDBOX_SSH_PORT:-2222}"
 
+# Per-session ssh authorized_keys built from host's ~/.ssh/*.pub AND any
+# keys loaded in the host ssh-agent (covers Secretive / Secure Enclave keys
+# that don't have a regular private file). The path is exported so devvm.nix
+# can readFile it at eval time via builtins.getEnv (--impure).
+SSH_KEY_DIR=$(mktemp -d "${TMPDIR:-/tmp}/devvm-keys.XXXXXXXX")
+{
+  for k in "$HOME"/.ssh/*.pub; do
+    [ -f "$k" ] && cat "$k" && printf '\n'
+  done
+  ssh-add -L 2>/dev/null || true
+} | awk 'NF && !seen[$0]++' > "$SSH_KEY_DIR/authorized_keys"
+if [ ! -s "$SSH_KEY_DIR/authorized_keys" ]; then
+  fail "No SSH public keys found in \$HOME/.ssh/*.pub or ssh-agent. Generate one with ssh-keygen, or unlock your agent."
+fi
+chmod 644 "$SSH_KEY_DIR/authorized_keys"
+log "Authorized $(wc -l < "$SSH_KEY_DIR/authorized_keys" | tr -d ' ') key(s)."
+
+export DEVVM_AUTHORIZED_KEYS_FILE="$SSH_KEY_DIR/authorized_keys"
+
 log "Building devvm…"
 INFO=$(nix --extra-experimental-features 'nix-command flakes' build \
-  --no-link --print-out-paths \
+  --impure --no-link --print-out-paths \
   "${FLAKE}#nixosConfigurations.devvm.config.system.build.devVmInfo")
 
 KERNEL=$(jq -r .kernel        "$INFO")
@@ -42,7 +61,7 @@ SERIAL=$(jq  -r .serialConsole "$INFO")
 SSH_USER=$(jq -r .sshUser     "$INFO")
 
 # Also realise the toplevel/initrd/regInfo/blankDisk into the local store.
-nix --extra-experimental-features 'nix-command flakes' build --no-link \
+nix --extra-experimental-features 'nix-command flakes' build --impure --no-link \
   "${FLAKE}#nixosConfigurations.devvm.config.system.build.toplevel" \
   "${FLAKE}#nixosConfigurations.devvm.config.system.build.initialRamdisk" \
   "${FLAKE}#nixosConfigurations.devvm.config.system.build.devVmBlankDisk"
@@ -54,23 +73,6 @@ git -C "$REPO_ROOT" worktree add -b "$BRANCH" "$WORKTREE" >/dev/null
 # No per-session disk image: -snapshot below makes QEMU open the backing
 # qcow2 read-only and write all dirty blocks to a temp file in $TMPDIR,
 # which it deletes on exit. macOS file cache means hot blocks stay in RAM.
-
-# Per-session ssh authorized_keys built from host's ~/.ssh/*.pub AND any
-# keys loaded in the host ssh-agent (covers Secretive / Secure Enclave keys
-# that don't have a regular private file). Mounted into the VM via 9p
-# (tag=hostkeys), which sshd reads via authorizedKeysFiles.
-SSH_KEY_DIR=$(mktemp -d "${TMPDIR:-/tmp}/devvm-hostkeys.XXXXXXXX")
-{
-  for k in "$HOME"/.ssh/*.pub; do
-    [ -f "$k" ] && cat "$k" && printf '\n'
-  done
-  ssh-add -L 2>/dev/null || true
-} | awk 'NF && !seen[$0]++' > "$SSH_KEY_DIR/authorized_keys"
-if [ ! -s "$SSH_KEY_DIR/authorized_keys" ]; then
-  fail "No SSH public keys found in \$HOME/.ssh/*.pub or ssh-agent. Generate one with ssh-keygen, or unlock your agent."
-fi
-chmod 644 "$SSH_KEY_DIR/authorized_keys"
-log "Authorized $(wc -l < "$SSH_KEY_DIR/authorized_keys" | tr -d ' ') key(s)."
 
 SERIAL_LOG="$SSH_KEY_DIR/serial.log"
 
@@ -127,7 +129,6 @@ QEMU_CPU="host"
   -device virtio-blk-pci,drive=drive0 \
   -virtfs "local,path=/nix/store,security_model=none,mount_tag=nix-store,readonly=on" \
   -virtfs "local,path=${WORKTREE},security_model=mapped-xattr,mount_tag=workdir" \
-  -virtfs "local,path=${SSH_KEY_DIR},security_model=none,mount_tag=hostkeys,readonly=on" \
   -kernel "$KERNEL" \
   -initrd "$INITRD" \
   -append "$APPEND" </dev/null &
@@ -158,30 +159,26 @@ SSH_OPTS="-p $SSH_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/nu
 SSH_RC=0
 ssh $SSH_OPTS -o LogLevel=ERROR \
   -t "${SSH_USER}@127.0.0.1" 'cd /mnt/work && exec $SHELL -l' || SSH_RC=$?
-if [ "$SSH_RC" -ne 0 ] && [ "$SSH_RC" -ne 130 ]; then
-  log "ssh exited $SSH_RC. Authorized fingerprints inside VM:"
-  ssh-keygen -l -f "$SSH_KEY_DIR/authorized_keys" 2>&1 \
-    | sed 's/^/    /' >&2 || true
-  log "Re-running with -v for diagnostics:"
+
+# Diagnostics only when ssh failed AND the VM is still alive — a clean
+# `sudo poweroff` from inside also returns non-zero (255: connection closed),
+# which isn't worth noisy diagnostics.
+if [ "$SSH_RC" -ne 0 ] && [ "$SSH_RC" -ne 130 ] && kill -0 "$QEMU_PID" 2>/dev/null; then
+  log "ssh exited $SSH_RC. Re-running with -v for diagnostics:"
   ssh $SSH_OPTS -v -o BatchMode=yes "${SSH_USER}@127.0.0.1" true 2>&1 \
     | sed 's/^/    /' >&2 || true
-  log "[devvm] lines from serial log:"
-  grep -F '[devvm]' "$SERIAL_LOG" 2>/dev/null | sed 's/^/    /' >&2 \
-    || echo "    (no [devvm] lines — import service did not run / not on console)" >&2
   log "Tail of VM serial log:"
   tail -n 120 "$SERIAL_LOG" 2>/dev/null | sed 's/^/    /' >&2 || true
 fi
 
-log "Shutting down VM…"
-ssh \
-  -p "$SSH_PORT" \
-  -o StrictHostKeyChecking=no \
-  -o UserKnownHostsFile=/dev/null \
-  -o LogLevel=ERROR \
-  "${SSH_USER}@127.0.0.1" 'sudo poweroff' 2>/dev/null || true
-
-# Give QEMU a moment to exit cleanly before cleanup() force-kills.
-for _ in $(seq 1 10); do
-  kill -0 "$QEMU_PID" 2>/dev/null || break
-  sleep 1
-done
+# If VM is still up, ask it to power off; otherwise skip (user already did).
+if kill -0 "$QEMU_PID" 2>/dev/null; then
+  log "Shutting down VM…"
+  ssh $SSH_OPTS -o LogLevel=ERROR \
+    "${SSH_USER}@127.0.0.1" 'sudo poweroff' 2>/dev/null || true
+  # Give QEMU a moment to exit cleanly before cleanup() force-kills.
+  for _ in $(seq 1 10); do
+    kill -0 "$QEMU_PID" 2>/dev/null || break
+    sleep 1
+  done
+fi
