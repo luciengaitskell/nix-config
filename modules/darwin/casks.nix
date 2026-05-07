@@ -32,4 +32,7 @@ _:
 
   # EE
   "kicad"
+
+  # general
+  "tor-browser"
 ]
