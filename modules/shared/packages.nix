@@ -77,7 +77,9 @@ with pkgs;
 
   # Dev tools
   vscode
-  antigravity
+  gemini-cli
+  claude-code
+  cursor-cli
 
   # Compilers
   gfortran14
