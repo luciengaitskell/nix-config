@@ -258,6 +258,8 @@ in
     };
   };
 
+  ghostty = import ./ghostty.nix { inherit pkgs lib; };
+
   ssh = {
     enable = true;
     enableDefaultConfig = false;
