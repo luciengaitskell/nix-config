@@ -95,7 +95,7 @@ in
       { path = "/System/Applications/Launchpad.app/"; }
       { path = "/Applications/Slack.app/"; }
       { path = "/System/Applications/Messages.app/"; }
-      { path = "${pkgs.alacritty}/Applications/Alacritty.app/"; }
+      { path = "/Applications/Ghostty.app/"; }
       { path = "/System/Applications/Music.app/"; }
       { path = "/System/Applications/News.app/"; }
       { path = "/System/Applications/Photos.app/"; }

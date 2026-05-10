@@ -29,10 +29,9 @@ in
       on-focus-changed = ['move-mouse window-lazy-center']
 
       [mode.main.binding]
-          # See: https://nikitabobko.github.io/AeroSpace/goodies#open-a-new-window-with-applescript
       alt-enter = ${"'''"}exec-and-forget osascript -e '
-      tell application "Terminal"
-        do script
+      tell application "Ghostty"
+        new window
         activate
       end tell'
       ${"'''"}
