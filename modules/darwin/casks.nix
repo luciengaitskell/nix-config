@@ -7,6 +7,7 @@ _:
   "balenaetcher"
   "raspberry-pi-imager"
   "secretive"
+  "ghostty"
 
   # Communication Tools
   "discord"
