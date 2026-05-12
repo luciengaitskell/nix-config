@@ -16,6 +16,7 @@ with pkgs;
   nixfmt
   yubikey-manager
   tailscale
+  mosh
 
   # Encryption and security tools
   age
