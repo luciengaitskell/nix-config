@@ -4,6 +4,7 @@
   inputs = {
     # Keep these stable release branches in sync.
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -53,6 +54,7 @@
       homebrew-verible,
       home-manager,
       nixpkgs,
+      nixpkgs-unstable,
       disko,
     }@inputs:
     let
@@ -66,6 +68,9 @@
         "x86_64-darwin"
       ];
       forAllSystems = f: nixpkgs.lib.genAttrs (linuxSystems ++ darwinSystems) f;
+      unstableOverlay = _final: prev: {
+        unstable = nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system};
+      };
       devShell =
         system:
         let
@@ -132,6 +137,7 @@
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew
             {
+              nixpkgs.overlays = [ unstableOverlay ];
               nix-homebrew = {
                 inherit user;
                 enable = true;
@@ -160,6 +166,7 @@
             disko.nixosModules.disko
             home-manager.nixosModules.home-manager
             {
+              nixpkgs.overlays = [ unstableOverlay ];
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
