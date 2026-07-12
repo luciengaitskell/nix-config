@@ -267,22 +267,21 @@ in
       (lib.mkIf pkgs.stdenv.hostPlatform.isLinux "/home/${user}/.ssh/config_external")
       (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin "/Users/${user}/.ssh/config_external")
     ];
-    matchBlocks = {
+    settings = {
       "*" = {
         # Set the default values we want to keep
-        sendEnv = [
+        SendEnv = [
           "LANG"
           "LC_*"
         ];
-        hashKnownHosts = true;
-        identitiesOnly = true;
+        HashKnownHosts = true;
+        IdentitiesOnly = true;
       };
       "github.com" = {
-        identitiesOnly = true;
-        identityFile = [
-          (lib.mkIf pkgs.stdenv.hostPlatform.isLinux "/home/${user}/.ssh/id_github")
-          (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin "/Users/${user}/.ssh/id_github")
-        ];
+        IdentitiesOnly = true;
+        IdentityFile =
+          lib.optionals pkgs.stdenv.hostPlatform.isLinux [ "/home/${user}/.ssh/id_github" ]
+          ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ "/Users/${user}/.ssh/id_github" ];
       };
     };
   };
