@@ -36,4 +36,7 @@ _:
 
   # general
   "tor-browser"
+
+  # Hardware dev
+  "prusaslicer"
 ]
