@@ -9,12 +9,14 @@ let
   name = "Luc Gaitskell";
   user = "lucg";
   email = "me@lucg.xyz";
+  cleanEnvWrappedCommands = [ "cursor-agent" ];
 in
 {
   # Shared shell configuration
   zsh = {
     enable = true;
     autocd = false;
+    shellAliases = lib.genAttrs cleanEnvWrappedCommands (command: "cleanenv ${command}");
 
     initContent = lib.mkBefore ''
       if [[ -z "$IN_NIX_SHELL" ]] && [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
@@ -37,6 +39,36 @@ in
       # nix shortcuts
       shell() {
           nix-shell '<nixpkgs>' -A "$1"
+      }
+
+      # Run a command with only essential identity, locale, and terminal variables.
+      cleanenv() {
+        if (( $# == 0 )); then
+          print -u2 'usage: cleanenv <command> [args...]'
+          return 2
+        fi
+
+        local -a clean_env
+        clean_env=(
+          "HOME=$HOME"
+          "USER=''${USER:-}"
+          "LOGNAME=''${LOGNAME:-}"
+          "PATH=$PATH"
+          "SHELL=''${SHELL:-${pkgs.zsh}/bin/zsh}"
+          "TERM=''${TERM:-xterm-256color}"
+          "LANG=''${LANG:-en_US.UTF-8}"
+        )
+
+        [[ -n "''${LC_ALL:-}" ]] && clean_env+=("LC_ALL=$LC_ALL")
+        [[ -n "''${LC_CTYPE:-}" ]] && clean_env+=("LC_CTYPE=$LC_CTYPE")
+        [[ -n "''${COLORTERM:-}" ]] && clean_env+=("COLORTERM=$COLORTERM")
+        [[ -n "''${TERM_PROGRAM:-}" ]] && clean_env+=("TERM_PROGRAM=$TERM_PROGRAM")
+        [[ -n "''${TERM_PROGRAM_VERSION:-}" ]] && clean_env+=("TERM_PROGRAM_VERSION=$TERM_PROGRAM_VERSION")
+        [[ -n "''${TERMINFO:-}" ]] && clean_env+=("TERMINFO=$TERMINFO")
+        [[ -n "''${TERMINFO_DIRS:-}" ]] && clean_env+=("TERMINFO_DIRS=$TERMINFO_DIRS")
+        [[ -n "''${COLORFGBG:-}" ]] && clean_env+=("COLORFGBG=$COLORFGBG")
+
+        env -i "''${clean_env[@]}" "$@"
       }
 
       # Use difftastic, syntax-aware diffing
