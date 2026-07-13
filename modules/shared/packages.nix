@@ -34,7 +34,6 @@ with pkgs;
   noto-fonts
   noto-fonts-color-emoji
   meslo-lgs-nf
-  spotify
   pandoc
   poppler-utils
 
@@ -76,12 +75,6 @@ with pkgs;
   python3
   uv
 
-  # Dev tools
-  vscode
-  gemini-cli
-  claude-code
-  cursor-cli
-
   # Compilers
   gfortran14
 
@@ -100,3 +93,13 @@ with pkgs;
   # LaTeX
   texlive.combined.scheme-full
 ]
+++ (with pkgs.unstable; [
+  # Fast-moving media-related packages
+  spotify
+
+  # Fast-moving development tools
+  vscode
+  gemini-cli
+  claude-code
+  cursor-cli
+])
