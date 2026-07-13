@@ -30,7 +30,6 @@ self: super: with super; {
         maintainers = [ maintainers.dlyons ];
         platforms = [
           platforms.x86_64-linux
-          platforms.x86_64-darwin
         ];
       };
     };
