@@ -29,8 +29,10 @@ self: super: with super; {
         license = licenses.mit;
         maintainers = [ maintainers.dlyons ];
         platforms = [
-          platforms.x86_64-linux
+          platforms.aarch64-darwin
+          platforms.aarch64-linux
           platforms.x86_64-darwin
+          platforms.x86_64-linux
         ];
       };
     };
