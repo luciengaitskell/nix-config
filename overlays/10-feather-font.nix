@@ -31,7 +31,6 @@ self: super: with super; {
         platforms = [
           platforms.aarch64-darwin
           platforms.aarch64-linux
-          platforms.x86_64-darwin
           platforms.x86_64-linux
         ];
       };
