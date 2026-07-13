@@ -89,7 +89,6 @@ in
       alt-0 = 'workspace 10'
       alt-c = 'workspace cal'
       alt-m = 'workspace mail'
-      alt-s = 'workspace slack'
       alt-x = 'workspace nix'
 
       alt-shift-1 = 'move-node-to-workspace 1'
@@ -102,8 +101,11 @@ in
       alt-shift-8 = 'move-node-to-workspace 8'
       alt-shift-9 = 'move-node-to-workspace 9'
       alt-shift-0 = 'move-node-to-workspace 10'
+      alt-shift-c = 'move-node-to-workspace cal'
+      alt-shift-m = 'move-node-to-workspace mail'
+      alt-shift-x = 'move-node-to-workspace nix'
 
-      alt-shift-c = 'reload-config'
+      alt-shift-r = 'reload-config'
 
       alt-r = 'mode resize'
 
