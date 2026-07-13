@@ -150,6 +150,10 @@
                 };
                 mutableTaps = false;
                 autoMigrate = true;
+                trust.formulae = [
+                  "riscv/riscv/riscv-gnu-toolchain"
+                  "chipsalliance/verible/verible"
+                ];
               };
             }
             ./hosts/darwin
