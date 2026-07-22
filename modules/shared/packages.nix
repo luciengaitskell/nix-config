@@ -99,6 +99,7 @@ with pkgs;
 
   # Fast-moving development tools
   vscode
+  docker-sbx
   gemini-cli
   claude-code
   cursor-cli
