@@ -37,6 +37,12 @@ in
         export VISUAL="vim"
 
       # nix shortcuts
+      export NIX_BUILD_SHELL="${pkgs.zsh}/bin/zsh"
+
+      nd() {
+        nix develop "$@" --command ${pkgs.zsh}/bin/zsh
+      }
+
       shell() {
           nix-shell '<nixpkgs>' -A "$1"
       }
