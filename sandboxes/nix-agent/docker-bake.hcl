@@ -24,6 +24,10 @@ variable "VARIANTS" {
   default = ["claude-code", "cursor-agent", "gemini"]
 }
 
+group "default" {
+  targets = ["nix-agent"]
+}
+
 target "nix-agent" {
   name       = "nix-agent-${variant}"
   matrix     = { variant = VARIANTS }
