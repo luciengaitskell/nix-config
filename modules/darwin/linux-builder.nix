@@ -5,7 +5,7 @@
     distributedBuilds = true;
 
     linux-builder = {
-      enable = false;
+      enable = true;
       systems = [ "aarch64-linux" ];
       config = {
         virtualisation.cores = lib.mkForce 4;
