@@ -6,7 +6,7 @@ let
   #   2. Set false, darwin-rebuild switch (builds rosetta image via still-running
   #      stock builder from the previous generation, then tears stock down)
   # Leave false afterward. Rosetta can rebuild itself from then on.
-  bootstrapWithStockBuilder = true;
+  bootstrapWithStockBuilder = false;
 in
 {
   nix.linux-builder = lib.mkIf bootstrapWithStockBuilder {
