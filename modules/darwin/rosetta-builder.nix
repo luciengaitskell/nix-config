@@ -18,6 +18,7 @@ in
   nix-rosetta-builder = {
     enable = !bootstrapWithStockBuilder;
     onDemand = true;
+    onDemandLingerMinutes = 10;
     cores = 4;
     diskSize = "64GiB";
   };
