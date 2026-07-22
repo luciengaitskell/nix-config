@@ -40,6 +40,10 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-rosetta-builder = {
+      url = "github:cpick/nix-rosetta-builder";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -56,6 +60,7 @@
       nixpkgs,
       nixpkgs-unstable,
       disko,
+      nix-rosetta-builder,
     }@inputs:
     let
       user = "lucg";
@@ -138,6 +143,7 @@
           modules = [
             home-manager.darwinModules.home-manager
             nix-homebrew.darwinModules.nix-homebrew
+            nix-rosetta-builder.darwinModules.default
             {
               nixpkgs.overlays = [ unstableOverlay ];
               nix-homebrew = {
