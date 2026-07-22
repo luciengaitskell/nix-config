@@ -7,7 +7,7 @@ in
 {
   imports = [
     ../../modules/darwin/home-manager.nix
-    ../../modules/darwin/linux-builder.nix
+    ../../modules/darwin/rosetta-builder.nix
     ../../modules/shared
   ];
 
