@@ -34,7 +34,7 @@ Repeat for other tags after rebuilding. Recreate existing sandboxes to pick up a
 
 ### Run
 
-Agent name must match the base variant:
+Select the matching sbx agent for the chosen template variant:
 
 ```bash
 sbx run --template nix-agent:claude-code claude
