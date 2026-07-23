@@ -1,0 +1,11 @@
+schemaVersion: "1"
+kind: mixin
+name: espressif
+displayName: Espressif
+description: Network allowlist for ESP-IDF / ESP Component Registry (copy into project as sbx/espressif)
+
+network:
+  allowedDomains:
+    - "dl.espressif.com:443"
+    - "components.espressif.com:443"
+    - "components-file.espressif.com:443"

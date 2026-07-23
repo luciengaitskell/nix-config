@@ -17,8 +17,14 @@
 #   sbx run --template nix-agent:cursor-agent cursor
 #   sbx run --template nix-agent:gemini gemini
 #
-# Optional Nix network allowlist if the default policy blocks caches:
-#   sbx policy allow network "cache.nixos.org:443,*.cachix.org:443,install.determinate.systems:443"
+# Kits (mixin network allowlists under sandboxes/kits/ — stack with --kit):
+#   sbx run claude \
+#     --template nix-agent:claude-code \
+#     --kit ~/nix-config/sandboxes/kits/nix \
+#     --kit ./sbx/espressif
+#
+# Copy sandboxes/kits/espressif into a project as sbx/espressif when needed.
+# Prefer kits over one-off: sbx policy allow network "..."
 
 variable "VARIANTS" {
   default = ["claude-code", "cursor-agent", "gemini"]
