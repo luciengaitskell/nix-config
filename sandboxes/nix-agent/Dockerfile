@@ -34,20 +34,3 @@ USER agent
 WORKDIR /home/agent
 
 ENV PATH="/nix/var/nix/profiles/default/bin:/home/agent/.nix-profile/bin:${PATH}"
-
-# direnv + nix-direnv: flaked workspaces auto-enter via `use flake` in .envrc
-RUN nix profile install nixpkgs#direnv nixpkgs#nix-direnv \
-  && mkdir -p /home/agent/.config/direnv \
-  && printf '%s\n' 'source "$HOME/.nix-profile/share/nix-direnv/direnvrc"' \
-       > /home/agent/.config/direnv/direnvrc \
-  && touch /home/agent/.bashrc /home/agent/.zshrc \
-  && printf '\n%s\n%s\n' \
-       '# Nix (sandbox nix-agent template)' \
-       'export PATH="/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:$PATH"' \
-       >> /home/agent/.bashrc \
-  && printf '%s\n' 'eval "$(direnv hook bash)"' >> /home/agent/.bashrc \
-  && printf '\n%s\n%s\n' \
-       '# Nix (sandbox nix-agent template)' \
-       'export PATH="/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:$PATH"' \
-       >> /home/agent/.zshrc \
-  && printf '%s\n' 'eval "$(direnv hook zsh)"' >> /home/agent/.zshrc
