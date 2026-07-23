@@ -1,14 +1,3 @@
-# Nix-ready Docker Sandbox template.
-# Extends official sandbox-templates so agent wiring + sbx credential proxy stay intact.
-#
-# Build (all variants):  docker buildx bake
-# Load into sbx:         docker image save nix-agent:claude-code -o /tmp/nix-agent-claude-code.tar
-#                        sbx template load /tmp/nix-agent-claude-code.tar
-# Run:                   sbx run --template nix-agent:claude-code claude
-#
-# Network: under default sbx policies you may need to allow Nix caches, e.g.
-#   sbx policy allow network "cache.nixos.org:443,*.cachix.org:443,install.determinate.systems:443"
-
 ARG VARIANT=claude-code
 FROM docker/sandbox-templates:${VARIANT}
 
