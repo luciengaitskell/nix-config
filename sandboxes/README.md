@@ -4,7 +4,55 @@ Docker Sandbox (`sbx`) assets used on this machine.
 
 | Path | Role |
 | --- | --- |
-| [`nix-agent/`](nix-agent/) | Custom templates: official sandbox-templates + Nix |
+| [`nix-agent/`](nix-agent/) | Custom templates: official `sandbox-templates` + Nix |
 | [`kits/`](kits/) | Mixin kits (network allowlists); stack with `--kit` |
 
-See [`nix-agent/README.md`](nix-agent/README.md) for build, load, and run instructions.
+## nix-agent templates
+
+Extends `docker/sandbox-templates:<variant>` so agent wiring and the sbx credential proxy stay intact; Nix is layered on top for flaked projects.
+
+Variants (no `-docker` siblings): `claude-code`, `cursor-agent`, `gemini`.
+
+### Build
+
+```bash
+cd sandboxes/nix-agent
+docker buildx bake                          # all variants
+docker buildx bake nix-agent-claude-code    # one variant
+```
+
+### Load into sbx
+
+The sbx runtime does not share the host Docker image store:
+
+```bash
+docker image save nix-agent:claude-code -o /tmp/nix-agent-claude-code.tar
+sbx template load /tmp/nix-agent-claude-code.tar
+```
+
+Repeat for other tags after rebuilding. Recreate existing sandboxes to pick up a new template.
+
+### Run
+
+Agent name must match the base variant:
+
+```bash
+sbx run --template nix-agent:claude-code claude
+sbx run --template nix-agent:cursor-agent cursor
+sbx run --template nix-agent:gemini gemini
+```
+
+## Kits
+
+Stack mixin network allowlists from `kits/` with `--kit`:
+
+```bash
+sbx run claude \
+  --template nix-agent:claude-code \
+  --kit ~/nix-config/sandboxes/kits/nix \
+  --kit ./sbx/espressif
+```
+
+Copy `kits/espressif` into a project as `sbx/espressif` when needed. Prefer kits over one-off `sbx policy allow network "..."`.
+
+Note: `docker buildx bake` runs on the host (outside sbx network policy). Template image builds may need outbound access to `install.determinate.systems`; that is unrelated to sandbox kit allowlists.
